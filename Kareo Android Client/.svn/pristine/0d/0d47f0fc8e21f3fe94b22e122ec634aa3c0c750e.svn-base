@@ -1,0 +1,92 @@
+package com.RSen.Kareo;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import com.google.gson.Gson;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Handler;
+import android.widget.Toast;
+
+public class UpdateChecker {
+	public Handler mHandler;
+	Context context;
+public UpdateChecker(Context context)
+	{
+		this.context = context;
+	mHandler = new Handler();
+    
+    /* Get Last Update Time from Preferences */
+    //SharedPreferences prefs = context.getSharedPreferences("prefs", Activity.MODE_PRIVATE);
+    //long lastUpdateTime =  prefs.getLong("lastUpdateTime", 0);
+    
+    /* Should Activity Check for Updates Now? */
+    if (true) //(lastUpdateTime + (24 * 60 * 60 * 1000)) < System.currentTimeMillis()) 
+    {
+        /* Save current timestamp for next Check*/
+        //lastUpdateTime = System.currentTimeMillis();            
+        //SharedPreferences.Editor editor = getPreferences(0).edit();
+        //editor.putLong("lastUpdateTime", lastUpdateTime);
+        //editor.commit();        
+
+        /* Start Update */            
+        checkUpdate.start();
+    }
+}
+
+/* This Thread checks for Updates in the Background */
+private Thread checkUpdate = new Thread() {
+    public void run() {
+        try {
+        	String updateURL = "http://watherapy.dnsalias.net/kareo/KareoRestClass/GetUpdateVersion";
+			 HttpGet request = new HttpGet(updateURL);  
+			
+		        ResponseHandler<String> handler = new BasicResponseHandler();
+		        HttpClient httpclient = new DefaultHttpClient();
+		            String result = httpclient.execute(request, handler);
+		            Gson gson = new Gson();
+		            int newVersion = gson.fromJson(result, int.class); 
+		            int curVersion = context.getPackageManager().getPackageInfo("com.RSen.Kareo", 0).versionCode;
+	            
+	                /* Is a higher version than the current already out? */
+	                if (newVersion > curVersion) {
+	                    /* Post a Handler for the UI to pick up and open the Dialog */
+	                    mHandler.post(showUpdate);
+	                }     
+		            	
+        } catch (Exception e) {
+        }
+    }
+};
+
+/* This Runnable creates a Dialog and asks the user to open the Market */ 
+private Runnable showUpdate = new Runnable(){
+       public void run(){
+        new AlertDialog.Builder(context)
+        .setIcon(R.drawable.ic_launcher)
+        .setTitle("Update Available")
+        .setMessage("An update is available!\nWould you like to download?")
+        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                        /* User clicked OK so do some stuff */
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=pname:com.RSen.Kareo"));
+                        context.startActivity(intent);
+                }
+        })
+        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                        Toast.makeText(context, "Please note app may not work, to update close and reopen app.", Toast.LENGTH_LONG).show();
+                }
+        })
+        .show();
+       }
+};    
+}

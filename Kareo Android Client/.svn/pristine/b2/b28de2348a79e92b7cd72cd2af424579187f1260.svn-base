@@ -1,0 +1,96 @@
+package com.RSen.Kareo;
+
+import org.joda.time.DateTime;
+
+import android.app.ProgressDialog;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.View;
+import android.widget.EditText;
+
+import com.actionbarsherlock.app.SherlockActivity;
+public class LogInActivity extends SherlockActivity {
+	UpdateChecker updateChecker;
+	 String email;
+	 String password;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		getSupportActionBar().hide();
+		setContentView(R.layout.log_in);
+		SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+		((EditText) findViewById(R.id.email)).setText(prefs.getString("email", ""));
+		AsyncAdapter.initialize(this); //so that date calculations can be made (prefrences)
+		findViewById(R.id.login).setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				 final ProgressDialog pd = ProgressDialog.show(LogInActivity.this, "", "Logging in...", true,
+                         false);
+				 final Handler handler = new Handler() {
+		                @Override
+		                public void handleMessage(Message msg) {
+		                        pd.dismiss();
+		                        if (msg.what == 1) //login successful
+		                        {
+		                        
+		                        SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+								Editor prefsEdit = prefs.edit();
+								
+		                        prefsEdit.putString("email", email);
+								prefsEdit.putString("password", password);
+								DateTime lastUsed = DateTime.now();
+								
+								prefs.edit().putLong("lastUsed", lastUsed.getMillis()).commit();
+								prefsEdit.commit();
+		                        }
+		                }
+		        };
+		        
+				 Thread thread = new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+					email = ((EditText) findViewById(R.id.email)).getText().toString();
+					password = ((EditText) findViewById(R.id.password)).getText().toString();
+						
+						Runnable runnable = new Runnable() {
+				            @Override
+				            public void run() {
+				                handler.post(new Runnable() { // This thread runs in the UI
+				                    @Override
+				                    public void run() {
+				                    	new CallWebServiceProviders().execute(email, password, LogInActivity.this, handler); 
+				                    }
+				                });
+				            }
+				        };
+				        new Thread(runnable).start();
+						
+					}
+				});
+				 thread.start();
+				
+				
+			}
+		});
+	}
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		updateChecker = new UpdateChecker(this);
+	}
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		updateChecker.mHandler = null;
+	}
+}

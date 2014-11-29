@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res/com.RSen.Kareo"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<com.RSen.Kareo.MyTitleFlowIndicator
+        android:id="@+id/viewflowindic" android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        app:footerLineHeight="2dp"
+        app:footerTriangleHeight="10dp" app:textColor="@color/orange" app:selectedColor="@color/orangeDark"
+        app:footerColor="@color/orangeDark" app:titlePadding="10dp" app:textSize="15sp" app:selectedSize="17sp"
+        
+        android:layout_marginTop="10dip"
+        app:clipPadding="5dp" />
+	<org.taptwo.android.widget.ViewFlow
+		android:duplicateParentState="true" android:id="@+id/viewflow"
+		android:layout_width="fill_parent" android:layout_height="fill_parent"></org.taptwo.android.widget.ViewFlow>
+</LinearLayout> 

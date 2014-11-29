@@ -1,0 +1,31 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.RSen.Kareo"
+    android:versionCode="5"
+    android:versionName="1.0.4" >
+
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="15" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:theme="@style/Theme.kareo"
+        android:hardwareAccelerated="true"
+        android:label="@string/app_name">
+        <activity
+            android:name=".scheduleViewActivity"
+            android:label="@string/app_name" android:configChanges="keyboardHidden|orientation|screenSize">
+       			<intent-filter>
+				<action android:name="android.intent.action.MAIN"></action>
+				<category android:name="android.intent.category.LAUNCHER"></category>
+			</intent-filter>
+        </activity>
+         <activity
+            android:name=".LogInActivity"
+            android:label="@string/app_name" >
+
+        </activity>
+    </application>
+
+</manifest>

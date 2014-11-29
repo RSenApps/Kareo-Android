@@ -1,0 +1,59 @@
+package com.RSen.Kareo;
+
+import android.app.ProgressDialog;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.View;
+import android.widget.EditText;
+
+import com.actionbarsherlock.app.SherlockActivity;
+public class LogInActivity extends SherlockActivity {
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		getSupportActionBar().hide();
+		setContentView(R.layout.log_in);
+		SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+		((EditText) findViewById(R.id.email)).setText(prefs.getString("email", ""));
+		findViewById(R.id.login).setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				 final ProgressDialog pd = ProgressDialog.show(LogInActivity.this, "", "Logging in...", true,
+                         false);
+				 final Handler handler = new Handler() {
+		                @Override
+		                public void handleMessage(Message msg) {
+		                        pd.dismiss();
+		 
+		                }
+		        };
+				 Thread thread = new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+						Editor prefsEdit = prefs.edit();
+						String email = ((EditText) findViewById(R.id.email)).getText().toString();
+						String password = ((EditText) findViewById(R.id.password)).getText().toString();
+						prefsEdit.putString("email", email);
+						prefsEdit.putString("password", password);
+						prefsEdit.commit();
+						new CallWebService().execute(email, password, LogInActivity.this, "providers", handler);
+					}
+				});
+				 thread.start();
+				
+				
+			}
+		});
+	}
+
+}

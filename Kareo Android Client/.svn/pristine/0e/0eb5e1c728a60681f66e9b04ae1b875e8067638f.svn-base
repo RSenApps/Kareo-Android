@@ -1,0 +1,46 @@
+package com.RSen.Kareo;
+
+import org.joda.time.LocalDate;
+
+public class Appointment {
+	String patientName ="";
+	String startTime="";
+	String endTime="";
+	String status="";
+	String location="";
+	String patientID="";
+	String notes="";
+	String dob="";
+	LocalDate date;
+	String alert="";
+	String reason="";
+	String resource="";
+	String gender="";
+	String phone="";
+	public Appointment()
+	{
+		super();
+	}
+	public Appointment(String patientName, String startTime, String endTime, String status, String location, String patientID, String notes, String dob, LocalDate date)
+	{
+		super();
+		if (patientName.matches("") || patientName.matches("No Patient"))
+		{
+			this.patientName = "No Patient";
+			this.patientID = "";
+		}
+		else 
+		{
+			this.patientName = patientName;
+
+			this.patientID = patientID;
+		}
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.status = status;
+		this.location = location;
+		this.notes = notes;
+		this.dob = dob;
+		this.date = date;
+	}
+}

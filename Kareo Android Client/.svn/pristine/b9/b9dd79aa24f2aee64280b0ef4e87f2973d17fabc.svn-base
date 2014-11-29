@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/pickDate" android:title="@string/pickDate" android:showAsAction="always" android:titleCondensed="Goto" android:icon="@drawable/ic_action_pick_date"></item>
+    <item android:id="@+id/today" android:title="@string/today" android:showAsAction="always" android:icon="@drawable/ic_action_today"></item>
+     <item android:id="@+id/refresh" android:showAsAction="ifRoom" android:icon="@drawable/ic_action_refresh" android:title="Refresh"></item>
+    <item android:id="@+id/feedback" android:title="Send Feedback" android:showAsAction="never"></item>
+        <item android:id="@+id/logout" android:title="Logout" android:showAsAction="never"></item>
+       
+</menu>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="true" >
+    </ProgressBar>
+	<TextView
+	    android:id="@+id/lastUpdated"
+	    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+	           android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text = "empty"
+        android:layout_marginLeft="20dp"
+        android:gravity="top">
+        </TextView>
+     <ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/divider"
+    android:src="@android:drawable/divider_horizontal_dark"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:scaleType="fitXY"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingBottom="2dp"
+    android:layout_below="@id/lastUpdated"
+    android:paddingTop="2dp" />
+     <View
+         android:id="@+id/divider"
+    android:layout_width="fill_parent"
+    android:layout_height="2dp"
+    android:layout_below="@id/lastUpdated"
+    android:background="@color/orangeDark"/>
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:divider="@color/orange"
+        android:layout_below="@id/divider"
+        android:dividerHeight="2dp"
+        tools:listitem="@android:layout/simple_list_item_1" >
+    </ListView>
+	
+</RelativeLayout>

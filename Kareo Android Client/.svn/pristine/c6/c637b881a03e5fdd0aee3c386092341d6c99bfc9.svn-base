@@ -1,0 +1,337 @@
+package com.RSen.Kareo;
+
+import java.io.IOException;
+
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.joda.time.LocalDate;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.view.View;
+
+import com.google.gson.Gson;
+
+public class CallWebService extends AsyncTask<Object, Object, Object> {
+		
+	String providersURL = "http://watherapy.dnsalias.net/kareo/KareoRestClass/getProviders";
+	String appointmentsURL;
+	String result;
+	String typeOfCall;
+	Context context;
+	static Boolean loginFailed = false;
+	View view;
+	int position;
+	AsyncAdapter adapter;
+	Handler handler;
+	Appointment appointment;
+	View dialogView;
+		
+		@Override
+		protected Object doInBackground(Object... arg) {
+			Encrypter encrypter = new Encrypter();
+			String encryptedEmail = "";
+			String encryptedPassword = "";
+			try {
+				encryptedEmail = encrypter.Encrypt((String) arg[0]);
+				encryptedPassword = encrypter.Encrypt((String) arg[1]);
+			} catch (Exception e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			context = (Context) arg[2];
+			typeOfCall = (String) arg[3];
+			
+			HttpClient httpclient = new DefaultHttpClient();  
+			
+			if (typeOfCall.matches("providers"))
+			{
+			//SharedPreferences prefs = context.getSharedPreferences("prefs",  Activity.MODE_PRIVATE);
+			
+	        /*
+	        HttpParams params = new BasicHttpParams();
+	        params.
+	        request.setParams(params)
+	        */
+				handler = (Handler) arg[4];
+				providersURL += "?a=" + encryptedEmail + "&b=" + encryptedPassword;
+		        HttpGet request = new HttpGet(providersURL);  
+		        
+	        String[] returnArray;
+	        ResponseHandler<String> handler = new BasicResponseHandler();
+	        try {  
+	            result = httpclient.execute(request, handler);
+	            
+	            context.getSharedPreferences("prefs", Activity.MODE_PRIVATE).edit().putString("providers", result).commit();
+	            Gson gson = new Gson();
+	            
+	            returnArray = gson.fromJson(result, String[].class);
+	            int i = 0;
+	            for (String a : returnArray)
+	            {
+	            	try {
+						returnArray[i] = encrypter.Decrypt(a);
+						i++;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	            }
+	            httpclient.getConnectionManager().shutdown(); 
+	            return returnArray;
+	        } catch (ClientProtocolException e) {  
+	            e.printStackTrace();  
+	        } catch (IOException e) {  
+	            e.printStackTrace();  
+	        }  
+	     
+			}
+			else if (typeOfCall.matches("appointments"))
+			{
+				
+				String provider = (String) arg[4];
+				String date = (String) arg[5];
+				position = (Integer) arg[6];
+				view = (View) arg[7];
+				adapter = (AsyncAdapter) arg[8];
+				String encryptedProvider ="";
+				String encryptedDate="";
+				try {
+					encryptedProvider = encrypter.Encrypt(provider);
+					encryptedDate = encrypter.Encrypt(date);
+				} catch (Exception e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+
+				 appointmentsURL = "http://watherapy.dnsalias.net/kareo/KareoRestClass/getAppointments?a=" + encryptedProvider + "&b=" + encryptedDate +"&c=" + encryptedEmail + "&d=" + encryptedPassword;
+				 HttpGet request = new HttpGet(appointmentsURL);  
+				
+			        ResponseHandler<String> handler = new BasicResponseHandler();
+			        try {  
+			            result = httpclient.execute(request, handler);
+			            Gson gson = new Gson();
+			            String[][] decryptionArray = gson.fromJson(result, String[][].class); 
+			            int x = 0;
+			            for (String[] a : decryptionArray)
+			            {
+			            	int i = 0;
+			            	for (String b : a)
+			            	{
+			            		
+				            	try {
+				            		if(b == null)
+				            		{
+				            			decryptionArray[x][i] = "";
+				            		}
+				            		else
+				            		{
+				            			decryptionArray[x][i] = encrypter.Decrypt(b);
+				            		}
+				            		i++;
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+			            	}
+			            	x++;
+			            }
+			            result = gson.toJson(decryptionArray);
+			            httpclient.getConnectionManager().shutdown(); 
+			            return decryptionArray;
+			        } catch (ClientProtocolException e) {  
+			        	e.printStackTrace();
+			        } catch (IOException e) {  
+			        	e.printStackTrace();
+			        }  
+			     
+					
+			}
+			else if(typeOfCall.matches("appointmentDetailed"))
+			{
+				appointment = (Appointment) arg[4];
+				String id = appointment.patientID;
+				String name = appointment.patientName;
+				adapter = (AsyncAdapter) arg[5];
+				dialogView = (View) arg[6];
+				String encryptedid ="";
+				String encryptedName="";
+				try {
+					encryptedid = encrypter.Encrypt(id);
+					encryptedName = encrypter.Encrypt(name);
+				} catch (Exception e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+
+				 appointmentsURL = "http://watherapy.dnsalias.net/kareo/KareoRestClass/getAppointmentDetailed?a=" + encryptedid + "&b=" + encryptedName +"&c=" + encryptedEmail + "&d=" + encryptedPassword;
+				 HttpGet request = new HttpGet(appointmentsURL);  
+				
+			        ResponseHandler<String> handler = new BasicResponseHandler();
+			        try {  
+			            result = httpclient.execute(request, handler);
+			            Gson gson = new Gson();
+			            String[] decryptionArray = gson.fromJson(result, String[].class); 
+			         
+			            	int i = 0;
+			            	for (String b : decryptionArray)
+			            	{
+			            		
+				            	try {
+				            		if(b == null)
+				            		{
+				            			decryptionArray[i] = "";
+				            		}
+				            		else
+				            		{
+				            			decryptionArray[i] = encrypter.Decrypt(b);
+				            		}
+				            		i++;
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+			            	}
+			            	
+			            result = gson.toJson(decryptionArray);
+			            httpclient.getConnectionManager().shutdown(); 
+			            return decryptionArray;
+			        } catch (ClientProtocolException e) {  
+			        	e.printStackTrace();
+			        } catch (IOException e) {  
+			        	e.printStackTrace();
+			        }  
+			}
+			httpclient.getConnectionManager().shutdown();   
+			return null;
+		}
+
+		protected void onPostExecute(Object result) {
+			if (typeOfCall.matches("providers"))
+			{
+				handler.sendEmptyMessage(0);
+				if (result == null)
+				{
+					AlertDialog.Builder builder = new AlertDialog.Builder(context);
+					builder.setTitle("Kareo");
+					builder.setMessage("Sorry, your login failed...");
+					builder.show();
+				}
+				else
+				{
+					final String[] providers = (String[]) result;
+					
+
+					AlertDialog.Builder builder = new AlertDialog.Builder(context);
+					builder.setTitle("Whose schedule would you like to view?");
+					builder.setItems(providers, new OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							SharedPreferences prefs = context.getSharedPreferences("prefs",  Activity.MODE_PRIVATE);
+							SharedPreferences.Editor editor = prefs.edit();
+							
+							editor.putString("provider", providers[which]);
+							editor.commit();
+							LogInActivity activity = (LogInActivity) context;
+							Intent i = new Intent(activity,
+									scheduleViewActivity.class);
+							context.startActivity(i);
+							activity.finish();
+						}
+					});
+					builder.show();
+				}
+			}
+
+			else if (typeOfCall.matches("appointmentDetailed"))
+			{
+				if (result == null)
+				{
+					AlertDialog.Builder builder = new Builder(context);
+					builder.setTitle("Can't show detailed appointment");
+					builder.setMessage("Sorry, detailed appointment information requires an active internet connection.");
+					builder.show();
+					
+				}
+				else
+				{
+					String[] patientInfo = (String[]) result;
+					appointment.notes = patientInfo[0];
+					appointment.dob = patientInfo[1];
+					adapter.showDetailedAppointment(appointment, context, dialogView);
+				}
+			}
+			else if (typeOfCall.matches("appointments"))
+			{
+				if (result == null)
+				{
+					
+					if (!loginFailed)
+					{
+						loginFailed = true;
+					AlertDialog.Builder builder = new AlertDialog.Builder(context);
+					builder.setTitle("Kareo");
+					builder.setMessage("Sorry, your login failed...");
+					builder.setPositiveButton("Retry", new OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							scheduleViewActivity activity = (scheduleViewActivity) context;
+							Intent i = new Intent(activity,
+									scheduleViewActivity.class);
+							context.startActivity(i);
+							activity.finish();
+						}
+					});
+					builder.setNegativeButton("Logout", new OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							SharedPreferences prefs = context.getSharedPreferences("prefs",  Activity.MODE_PRIVATE);
+							SharedPreferences.Editor editor = prefs.edit();
+							editor.putString("email", "");
+							editor.putString("password", "");
+							editor.commit();
+							scheduleViewActivity activity = (scheduleViewActivity) context;
+							Intent i = new Intent(activity,
+									LogInActivity.class);
+							context.startActivity(i);
+							activity.finish();
+						}
+					});
+					builder.show();
+
+
+					
+					}
+				}
+				else
+				{
+					LocalDate date = adapter.getPositionDate(position);
+					AsyncAdapter.content.put(date, (String[][]) result);
+			    	adapter.drawView(position, view);
+			    	
+			    	view.postInvalidate();
+				}
+			}
+			
+	     }
+
+	}
+

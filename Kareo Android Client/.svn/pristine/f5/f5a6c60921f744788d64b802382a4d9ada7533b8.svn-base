@@ -1,0 +1,66 @@
+package com.RSen.Kareo;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Environment;
+import android.os.Handler;
+
+
+public class InstallUpdate extends AsyncTask<Object, Object, Object> {
+
+	@Override
+	protected Object doInBackground(Object... arg) {
+		// TODO Auto-generated method stub
+		String url = "https://dl.dropbox.com/s/e3ed4eiahnxreaq/Kareo%20Android%20Client.apk";
+		String PATH = Environment.getExternalStorageDirectory() + "/download/";
+		
+		File file = new File(PATH);
+		file.mkdirs();
+		File outputFile = new File(file, "Kareo.apk");
+		downloadFile(url, outputFile);
+		installApp(((Context)arg[0]));
+		((Handler) arg[1]).sendEmptyMessage(0);
+		return null;
+	}
+	private static void downloadFile(String url, File outputFile) {
+		try {
+			URL u = new URL(url);
+			URLConnection conn = u.openConnection();
+			int contentLength = conn.getContentLength();
+
+			DataInputStream stream = new DataInputStream(u.openStream());
+
+			byte[] buffer = new byte[contentLength];
+			stream.readFully(buffer);
+			stream.close();
+			
+			DataOutputStream fos = new DataOutputStream(new FileOutputStream(outputFile));
+			fos.write(buffer);
+			fos.flush();
+			fos.close();
+		} catch (FileNotFoundException e) {
+			return; 
+		} catch (IOException e) {
+			return; 
+		}
+	}
+
+
+	private static void installApp(Context mycontext) {
+		Intent installer = new Intent();
+		installer.setAction(android.content.Intent.ACTION_VIEW);
+		String PATH = "file://" + Environment.getExternalStorageDirectory() + "/download/Kareo.apk";
+		installer.setDataAndType(Uri.parse(PATH), "application/vnd.android.package-archive");
+		mycontext.startActivity(installer);
+	}
+}
